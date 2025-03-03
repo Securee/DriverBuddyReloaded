@@ -1,6 +1,7 @@
 import ida_bytes
 import idaapi
 import idc
+import ida_ida
 
 from collections import namedtuple
 
@@ -41,7 +42,8 @@ def add_struct(version):
 
     # globals auto switch based on driver's architecture
     # dependent globals
-    is64 = idaapi.get_inf_structure().is_64bit()
+    # is64 = idaapi.get_inf_structure().is_64bit()
+    is64 = ida_ida.inf_is_64bit()
     if is64 is True:
         FF_PTR = ida_bytes.FF_QWORD
         ptr_size = 8
@@ -84,7 +86,8 @@ def populate_wdf():
     """
 
     # globals auto switch based on driver's architecture dependent globals
-    is64 = idaapi.get_inf_structure().is_64bit()
+    # is64 = idaapi.get_inf_structure().is_64bit()
+    is64 = ida_ida.inf_is_64bit()
     if is64 is True:
         get_ptr = idaapi.get_64bit
         ptr_size = 8
@@ -100,7 +103,8 @@ def populate_wdf():
             # search `mdfLibrary` unicode string in .rdata section
             binpat = idaapi.compiled_binpat_vec_t()
             ida_bytes.parse_binpat_str(binpat, 0, 'L"mdfLibrary"', 16)
-            idx = ida_bytes.bin_search(segm.start_ea, segm.end_ea, binpat, ida_bytes.BIN_SEARCH_NOCASE)
+            # idx = ida_bytes.bin_search(segm.start_ea, segm.end_ea, binpat, ida_bytes.BIN_SEARCH_NOCASE)
+            idx, _ = ida_bytes.bin_search(segm.start_ea, segm.end_ea, binpat, ida_bytes.BIN_SEARCH_NOCASE)
             if idx != idaapi.BADADDR:
                 actual_library = chr(ida_bytes.get_byte(idx-2)) + "mdfLibrary"
                 log(("Found %s string at 0x%x") % (actual_library, idx - 2))
